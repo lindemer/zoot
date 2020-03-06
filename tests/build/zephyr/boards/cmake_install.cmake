@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/boards/posix/native_posix/cmake_install.cmake")
+  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/boards/arm/nrf52840_pca10059/cmake_install.cmake")
 
 endif()
 

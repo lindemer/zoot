@@ -36,6 +36,9 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/console/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/interrupt_controller/cmake_install.cmake")
+  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/clock_control/cmake_install.cmake")
+  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/gpio/cmake_install.cmake")
+  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/serial/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/drivers/timer/cmake_install.cmake")
 
 endif()

@@ -21,16 +21,16 @@ APPLICATION_BINARY_DIR:PATH=/home/samuel/zephyrproject/zoot/tests/build
 APPLICATION_SOURCE_DIR:PATH=/home/samuel/zephyrproject/zoot/tests
 
 //No help, variable specified on the command line.
-BOARD:UNINITIALIZED=native_posix
+BOARD:UNINITIALIZED=nrf52840_pca10059
 
 //Path to a file.
-BOARD_DIR:PATH=/home/samuel/zephyrproject/zephyr/boards/posix/native_posix
+BOARD_DIR:PATH=/home/samuel/zephyrproject/zephyr/boards/arm/nrf52840_pca10059
 
 //Path to a program.
 BOSSAC:FILEPATH=/home/samuel/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/bossac
 
 //Selected board
-CACHED_BOARD:STRING=native_posix
+CACHED_BOARD:STRING=nrf52840_pca10059
 
 //Selected shield
 CACHED_SHIELD:STRING=
@@ -39,21 +39,24 @@ CACHED_SHIELD:STRING=
 CCACHE_FOUND:FILEPATH=/usr/bin/ccache
 
 //Path to a program.
-CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
+CMAKE_ADDR2LINE:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-addr2line
 
 //Path to a program.
-CMAKE_AR:FILEPATH=/usr/bin/ar
+CMAKE_AR:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-ar
+
+//Path to a program.
+CMAKE_AS:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-as
 
 //ASM compiler
-CMAKE_ASM_COMPILER:FILEPATH=/usr/bin/gcc
+CMAKE_ASM_COMPILER:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_ASM_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar
+CMAKE_ASM_COMPILER_AR:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ar
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_ASM_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib
+CMAKE_ASM_COMPILER_RANLIB:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ranlib
 
 //Flags used by the ASM compiler during all build types.
 CMAKE_ASM_FLAGS:STRING=
@@ -75,15 +78,15 @@ CMAKE_ASM_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 CMAKE_BUILD_TYPE:STRING=
 
 //Path to a program.
-CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/gcc
+CMAKE_CXX_COMPILER:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-g++
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-7
+CMAKE_CXX_COMPILER_AR:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ar
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-7
+CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ranlib
 
 //Flags used by the CXX compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
@@ -101,15 +104,15 @@ CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
 //Path to a program.
-CMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc
+CMAKE_C_COMPILER:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-7
+CMAKE_C_COMPILER_AR:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ar
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-7
+CMAKE_C_COMPILER_RANLIB:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-ranlib
 
 //Flags used by the C compiler during all build types.
 CMAKE_C_FLAGS:STRING=
@@ -148,13 +151,13 @@ CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
 
 //Path to a program.
-CMAKE_GDB:FILEPATH=/usr/bin/gdb
+CMAKE_GDB:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb
 
 //Install path prefix, prepended onto install directories.
 CMAKE_INSTALL_PREFIX:PATH=/usr/local
 
 //Path to a program.
-CMAKE_LINKER:FILEPATH=/usr/bin/ld
+CMAKE_LINKER:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-ld
 
 //Program used to build from build.ninja files.
 CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/ninja
@@ -180,13 +183,13 @@ CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_NM:FILEPATH=/usr/bin/nm
+CMAKE_NM:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-nm
 
 //Path to a program.
-CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
+CMAKE_OBJCOPY:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objcopy
 
 //Path to a program.
-CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
+CMAKE_OBJDUMP:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump
 
 //Value Computed by CMake
 CMAKE_PROJECT_DESCRIPTION:STATIC=
@@ -213,13 +216,10 @@ CMAKE_PROJECT_VERSION_PATCH:STATIC=0
 CMAKE_PROJECT_VERSION_TWEAK:STATIC=
 
 //Path to a program.
-CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
+CMAKE_RANLIB:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-ranlib
 
 //Path to a program.
-CMAKE_RANLILB:FILEPATH=/usr/bin/ranlib
-
-//Path to a program.
-CMAKE_READELF:FILEPATH=/usr/bin/readelf
+CMAKE_READELF:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-readelf
 
 //Flags used by the linker during the creation of shared libraries
 // during all build types.
@@ -269,7 +269,7 @@ CMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_STRIP:FILEPATH=/usr/bin/strip
+CMAKE_STRIP:FILEPATH=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-strip
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
@@ -307,13 +307,49 @@ OPENOCD:FILEPATH=/home/samuel/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/o
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.6
 
 //True if toolchain supports newlib
-TOOLCHAIN_HAS_NEWLIB:BOOL=OFF
+TOOLCHAIN_HAS_NEWLIB:BOOL=ON
 
 //Zephyr toolchain root
 TOOLCHAIN_ROOT:STRING=/home/samuel/zephyrproject/zephyr
 
 //Path to a program.
 WEST:FILEPATH=/home/samuel/.local/bin/west
+
+//Default runner for debugging
+ZEPHYR_BOARD_DEBUG_RUNNER:STRING=jlink
+
+//Default runner for flashing binaries
+ZEPHYR_BOARD_FLASH_RUNNER:STRING=nrfjprog
+
+//Runner-specific arguments for jlink
+ZEPHYR_RUNNER_ARGS_jlink:STRING=--dt-flash=y;--device=nrf52;--speed=4000
+
+//Runner-specific arguments for nrfjprog
+ZEPHYR_RUNNER_ARGS_nrfjprog:STRING=--nrf-family=NRF52
+
+//Runner-specific arguments for pyocd
+ZEPHYR_RUNNER_ARGS_pyocd:STRING=--dt-flash=y;--target=nrf52840;--frequency=4000000
+
+//Board definition directory
+ZEPHYR_RUNNER_CONFIG_BOARD_DIR:STRING=/home/samuel/zephyrproject/zephyr/boards/arm/nrf52840_pca10059
+
+//Path to GDB binary, if applicable
+ZEPHYR_RUNNER_CONFIG_GDB:STRING=/home/samuel/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb
+
+//Path to kernel image as raw binary
+ZEPHYR_RUNNER_CONFIG_KERNEL_BIN:STRING=/home/samuel/zephyrproject/zoot/tests/build/zephyr/zephyr.bin
+
+//Path to kernel image in ELF format
+ZEPHYR_RUNNER_CONFIG_KERNEL_ELF:STRING=/home/samuel/zephyrproject/zoot/tests/build/zephyr/zephyr.elf
+
+//Path to kernel image in Intel Hex format
+ZEPHYR_RUNNER_CONFIG_KERNEL_HEX:STRING=/home/samuel/zephyrproject/zoot/tests/build/zephyr/zephyr.hex
+
+//Path to openocd binary, if applicable
+ZEPHYR_RUNNER_CONFIG_OPENOCD:STRING=/home/samuel/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/bin/openocd
+
+//Path to add to openocd search path, if applicable
+ZEPHYR_RUNNER_CONFIG_OPENOCD_SEARCH:STRING=/home/samuel/zephyr-sdk/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts
 
 //Zephyr SDK install directory
 ZEPHYR_SDK_INSTALL_DIR:PATH=/home/samuel/zephyr-sdk
@@ -397,8 +433,6 @@ CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_FLAGS_RELWITHDEBINFO
 CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_C_COMPILER
-CMAKE_C_COMPILER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_COMPILER_AR
 CMAKE_C_COMPILER_AR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_COMPILER_RANLIB
@@ -459,7 +493,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=84
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=96
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -508,4 +542,8 @@ FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3.6][v3.6.9(3
 GIT_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
+//Available runners
+ZEPHYR_RUNNERS:INTERNAL=nrfjprog;jlink;pyocd
+//a configuration file for the runners Python package
+ZEPHYR_RUNNERS_YAML:INTERNAL=/home/samuel/zephyrproject/zoot/tests/build/zephyr/runners.yaml
 

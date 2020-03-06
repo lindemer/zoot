@@ -36,7 +36,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/arch/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/lib/cmake_install.cmake")
-  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/soc/posix/cmake_install.cmake")
+  include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/soc/arm/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/boards/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/ext/cmake_install.cmake")
   include("/home/samuel/zephyrproject/zoot/tests/build/zephyr/subsys/cmake_install.cmake")
