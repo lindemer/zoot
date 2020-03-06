@@ -1,9 +1,9 @@
 menuconfig ZOOT
     bool "Zoot Support"
-    select COZY
-    select MCUMGR 
+    select MCUMGR
     select TINYCBOR
     select MBEDTLS
+    select COZY
     help
         This option enables the Zoot SUIT library.
 

@@ -9,10 +9,9 @@ Add the following line to your app's `CMakeLists.txt`:
 
     set(ZEPHYR_EXTRA_MODULES <absolute_path_to>/zoot)
 
-Add the following lines to your app's `prj.conf`:
+Add the following line to your app's `prj.conf`:
 
     CONFIG_ZOOT=y
-    CONFIG_MBEDTLS_CFG_FILE="config-suite-b.h"
 
 Access the **Zoot** API from your source files with `#include <zoot/suit.h>`.
 

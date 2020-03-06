@@ -34,8 +34,8 @@
 #define SUIT_H
 
 #include <zephyr.h>
-#include <cozy/cose.h>
 #include <tinycbor/cbor.h>
+#include <cozy/cose.h>
 
 /** 
  * @brief SUIT API
