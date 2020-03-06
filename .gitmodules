@@ -1,0 +1,3 @@
+[submodule "cozy"]
+	path = cozy
+	url = https://github.com/motet/cozy

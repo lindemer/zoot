@@ -1,0 +1,17 @@
+zephyr/linker.cmd: \
+ /home/samuel/zephyrproject/zephyr/soc/posix/inf_clock/linker.ld \
+ /usr/include/stdc-predef.h \
+ /home/samuel/zephyrproject/zephyr/include/arch/posix/linker.ld \
+ /home/samuel/zephyrproject/zoot/tests/build/zephyr/include/generated/autoconf.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/sections.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/section_tags.h \
+ /home/samuel/zephyrproject/zephyr/include/toolchain.h \
+ /home/samuel/zephyrproject/zephyr/include/toolchain/gcc.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/linker-defs.h \
+ /home/samuel/zephyrproject/zephyr/include/sys/util.h \
+ /home/samuel/zephyrproject/zoot/tests/build/zephyr/include/generated/offsets.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/linker-tool.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/linker-tool-gcc.h \
+ /home/samuel/zephyrproject/zephyr/include/linker/common-rom.ld \
+ /home/samuel/zephyrproject/zephyr/include/linker/common-ram.ld \
+ /home/samuel/zephyrproject/zephyr/include/arch/posix/native_tasks.ld
