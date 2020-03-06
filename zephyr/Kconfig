@@ -7,14 +7,3 @@ menuconfig ZOOT
     help
         This option enables the Zoot SUIT library.
 
-if ZOOT
-
-config ZOOT_PARSE
-    bool "Compile SUIT parser sources"
-    default y
-
-config ZOOT_GENERATE
-    bool "Compile SUIT generator sources"
-    default y
-
-endif

@@ -7,7 +7,6 @@ target_include_directories(zoot INTERFACE include)
 zephyr_library()
 zephyr_library_sources(
     src/parse.c
-    src/generate.c
     )
 zephyr_library_link_libraries(zoot)
 zephyr_include_directories(include)
