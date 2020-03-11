@@ -1,10 +1,11 @@
 zephyr_interface_library_named(zoot)
 set(WITH_ZEPHYR 1)
 set(WITH_ZEPHYR_LIB 1)
+set(ZEPHYR_EXTRA_MODULES cozy)
+
 target_include_directories(zoot INTERFACE include)
 
 zephyr_library()
-add_subdirectory(cozy)
 zephyr_library_sources(
     src/parse.c
     )

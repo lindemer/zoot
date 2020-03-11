@@ -19,7 +19,31 @@
 #include <zoot/suit.h>
 #include "vectors.h"
 
-void test_suit_placeholder(void) {
-    printk("WARNING - This test has not been implemented.\n");
-    zassert_false(0, ""); 
+const uint8_t * key = SUIT_TEST_KEY_256_PUB;
+const uint8_t env0[231] = SUIT_EXAMPLE_0;
+const uint8_t env1[266] = SUIT_EXAMPLE_1;
+const uint8_t env2[271] = SUIT_EXAMPLE_2;
+
+void test_suit_boot(void) {
+    uint8_t * man;
+    size_t len_man;
+    zassert_false(suit_authenticate_pem(
+                env0, sizeof(env0), key, (const uint8_t **) &man, &len_man),
+                "Failed to authenticate envelope contents."); 
+}
+ 
+void test_suit_download_install(void) {
+    uint8_t * man;
+    size_t len_man;
+    zassert_false(suit_authenticate_pem(
+                env1, sizeof(env1), key, (const uint8_t **) &man, &len_man),
+                "Failed to authenticate envelope contents."); 
+}
+
+void test_suit_download_install_boot(void) {
+    uint8_t * man;
+    size_t len_man;
+    zassert_false(suit_authenticate_pem(
+                env2, sizeof(env2), key, (const uint8_t **) &man, &len_man),
+                "Failed to authenticate envelope contents."); 
 }

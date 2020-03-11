@@ -19,8 +19,8 @@
 #define SUIT_H
 
 #include <zephyr.h>
-#include <tinycbor/cbor.h>
 #include <cozy/cose.h>
+#include "nanocbor/nanocbor.h"
 
 /** 
  * @brief SUIT API
@@ -185,6 +185,25 @@ typedef enum {
     suit_text_man_yaml_src = 9,
     suit_text_ver_deps = 10,
 } suit_text_t;
+
+/**
+ * @brief Authenticate a signed SUIT envelope and return the manifest
+ * 
+ * @param       env     Pointer to SUIT envelope
+ * @param       len     Size of env
+ * @param       pem     Pointer to PEM-formatted public key string
+ * @param[out]  man     Pointer to manifest within authenticated envelope
+ * @param[out]  len_man Size of man
+ *
+ * @retval      0       TODO
+ * @retval      1       TODO
+ */
+int suit_authenticate_pem(
+        const uint8_t * env,
+        const size_t len_env,
+        const uint8_t * pem, 
+        const uint8_t ** man,
+        size_t * len_man);
 
 /**
  * @}

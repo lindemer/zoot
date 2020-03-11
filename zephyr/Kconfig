@@ -1,6 +1,5 @@
 menuconfig ZOOT
     bool "Zoot Support"
-    select TINYCBOR
     select MBEDTLS
     select COZY
     help

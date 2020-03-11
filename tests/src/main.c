@@ -17,12 +17,16 @@
 
 #include <ztest.h>
 
-extern void test_suit_placeholder(void);
+extern void test_suit_boot(void);
+extern void test_suit_download_install(void);
+extern void test_suit_download_install_boot(void);
 
 /* test case main entry */
 void test_main(void)
 {
     ztest_test_suite(suit_tests,
-        ztest_unit_test(test_suit_placeholder));
+        ztest_unit_test(test_suit_boot),
+        ztest_unit_test(test_suit_download_install),
+        ztest_unit_test(test_suit_download_install_boot));
     ztest_run_test_suite(suit_tests);
 }
