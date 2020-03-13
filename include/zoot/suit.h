@@ -18,9 +18,7 @@
 #ifndef SUIT_H
 #define SUIT_H
 
-#include <zephyr.h>
 #include <cozy/cose.h>
-#include "nanocbor/nanocbor.h"
 
 /** 
  * @brief SUIT API
@@ -189,21 +187,34 @@ typedef enum {
 /**
  * @brief Authenticate a signed SUIT envelope and return the manifest
  * 
- * @param       env     Pointer to SUIT envelope
- * @param       len     Size of env
  * @param       pem     Pointer to PEM-formatted public key string
+ * @param       env     Pointer to SUIT envelope
+ * @param       len_env Size of env
  * @param[out]  man     Pointer to manifest within authenticated envelope
  * @param[out]  len_man Size of man
  *
  * @retval      0       TODO
  * @retval      1       TODO
  */
-int suit_authenticate_pem(
-        const uint8_t * env,
-        const size_t len_env,
-        const uint8_t * pem, 
-        const uint8_t ** man,
-        size_t * len_man);
+int suit_env_unwrap(const uint8_t * pem, 
+        const uint8_t * env, const size_t len_env,
+        const uint8_t ** man, size_t * len_man);
+
+/**
+ * @brief Generate a manifest envelope with authenticated wrapper
+ *
+ * @param       pem     Pointer to PEM-formatted private key string
+ * @param       man     Pointer to SUIT manifest
+ * @param       len_man Size of man
+ * @param[out]  env     Pointer to SUIT envelope (buffer allocated by CALLER)
+ * @param[out]  len_env Size of env
+ *
+ * @retval      0       TODO
+ * @retval      1       TODO
+ */
+int suit_env_wrap(const uint8_t * pem,
+        const uint8_t * man, const size_t len_man,
+        uint8_t * env, size_t * len_env);
 
 /**
  * @}

@@ -19,31 +19,79 @@
 #include <zoot/suit.h>
 #include "vectors.h"
 
-const uint8_t * key = SUIT_TEST_KEY_256_PUB;
-const uint8_t env0[231] = SUIT_EXAMPLE_0;
-const uint8_t env1[266] = SUIT_EXAMPLE_1;
-const uint8_t env2[271] = SUIT_EXAMPLE_2;
+#define SUIT_MANIFEST(x)                                                \
+    size_t len_man = strlen(SUIT_MANIFEST_##x) / 2;                     \
+    uint8_t man[len_man];                                               \
+    _xxd_r(SUIT_MANIFEST_##x, man);
+
+/* converts hex-formatted IETF examples to raw bytes */
+void _xxd_r(char * hex, uint8_t * out)
+{
+    size_t len_hex = strlen(hex);
+    uint8_t buf[5] = {'0', 'x', 0, 0, 0};
+    for (int i = 0; i < len_hex / 2; i++) {
+        buf[2] = hex[i]; buf[3] = hex[i+1];
+        out[i] = strtol(buf, NULL, 0);
+        hex++;
+    } 
+}
+
+const uint8_t * pem_pub = SUIT_TEST_KEY_256_PUB;
+const uint8_t * pem_prv = SUIT_TEST_KEY_256_PRV;
 
 void test_suit_boot(void) {
-    uint8_t * man;
-    size_t len_man;
-    zassert_false(suit_authenticate_pem(
-                env0, sizeof(env0), key, (const uint8_t **) &man, &len_man),
-                "Failed to authenticate envelope contents."); 
+    SUIT_MANIFEST(0)
+
+    size_t len_env = 512;
+    uint8_t env[len_env];
+    zassert_false(suit_env_wrap(
+                pem_prv, man, len_man, env, &len_env),
+                "Failed to write manifest envelope.");
+
+    uint8_t * man_out;
+    size_t len_man_out;
+    zassert_false(suit_env_unwrap(
+                pem_pub, env, len_env, 
+                (const uint8_t **) &man_out, &len_man_out),
+                "Failed to authenticate envelope contents.");
+    zassert_true(len_man == len_man_out, "Failed to extract manifest.");
+    zassert_false(memcmp(man, man_out, len_man), "Failed to extract manifest.");
 }
  
 void test_suit_download_install(void) {
-    uint8_t * man;
-    size_t len_man;
-    zassert_false(suit_authenticate_pem(
-                env1, sizeof(env1), key, (const uint8_t **) &man, &len_man),
-                "Failed to authenticate envelope contents."); 
+    SUIT_MANIFEST(1)
+
+    size_t len_env = 512;
+    uint8_t env[len_env];
+    zassert_false(suit_env_wrap(
+                pem_prv, man, len_man, env, &len_env),
+                "Failed to write manifest envelope.");
+
+    uint8_t * man_out;
+    size_t len_man_out;
+    zassert_false(suit_env_unwrap(
+                pem_pub, env, len_env, 
+                (const uint8_t **) &man_out, &len_man_out),
+                "Failed to authenticate envelope contents.");
+    zassert_true(len_man == len_man_out, "Failed to extract manifest.");
+    zassert_false(memcmp(man, man_out, len_man), "Failed to extract manifest.");
 }
 
 void test_suit_download_install_boot(void) {
-    uint8_t * man;
-    size_t len_man;
-    zassert_false(suit_authenticate_pem(
-                env2, sizeof(env2), key, (const uint8_t **) &man, &len_man),
-                "Failed to authenticate envelope contents."); 
+    SUIT_MANIFEST(2)
+
+    size_t len_env = 512;
+    uint8_t env[len_env];
+    zassert_false(suit_env_wrap(
+                pem_prv, man, len_man, env, &len_env),
+                "Failed to write manifest envelope.");
+
+    uint8_t * man_out;
+    size_t len_man_out;
+    zassert_false(suit_env_unwrap(
+                pem_pub, env, len_env, 
+                (const uint8_t **) &man_out, &len_man_out),
+                "Failed to authenticate envelope contents.");
+    zassert_true(len_man == len_man_out, "Failed to extract manifest.");
+    zassert_false(memcmp(man, man_out, len_man), "Failed to extract manifest.");
 }
