@@ -77,7 +77,7 @@ int suit_env_unwrap(const uint8_t * pem,
     size_t md_size = mbedtls_md_get_size(md_info);
     uint8_t hash_out[md_size];
     mbedtls_md(md_info, *man, *len_man, hash_out);
-    if (memcmp(hash, hash_out, md_size)) return 1; 
+    if (memcmp(hash, hash_out, md_size)) return 1;
 
     /* clean up */
     cose_sign_free(&ctx);
