@@ -127,5 +127,4 @@ int suit_env_wrap(const uint8_t * pem,
     /* clean up */
     cose_sign_free(&ctx);
     return 0;
-    
 }
