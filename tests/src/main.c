@@ -20,6 +20,10 @@
 extern void test_suit_boot(void);
 extern void test_suit_download_install(void);
 extern void test_suit_download_install_boot(void);
+extern void test_suit_load_external_storage(void);
+extern void test_suit_load_decompress_external_storage(void);
+extern void test_suit_compatibility_download_install_boot(void);
+extern void test_suit_two_images(void);
 
 /* test case main entry */
 void test_main(void)
@@ -27,6 +31,10 @@ void test_main(void)
     ztest_test_suite(suit_tests,
         ztest_unit_test(test_suit_boot),
         ztest_unit_test(test_suit_download_install),
-        ztest_unit_test(test_suit_download_install_boot));
+        ztest_unit_test(test_suit_download_install_boot),
+        ztest_unit_test(test_suit_load_external_storage),
+        ztest_unit_test(test_suit_load_decompress_external_storage),
+        ztest_unit_test(test_suit_compatibility_download_install_boot),
+        ztest_unit_test(test_suit_two_images));
     ztest_run_test_suite(suit_tests);
 }

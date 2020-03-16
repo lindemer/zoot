@@ -14,3 +14,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+#include <zoot/suit.h>
+
+int suit_parser_init(suit_parser_t * sp,
+        const uint8_t * man, size_t len_man)
+{
+    nanocbor_value_t nc, map;
+    nanocbor_decoder_init(&nc, man, len_man);
+
+    if (nanocbor_enter_map(&nc, &map) < 0) return 1;
+    int32_t map_key;
+    uint8_t * common; size_t len_common;
+
+    while (!nanocbor_at_end(&map)) {
+        if (nanocbor_get_int32(&map, &map_key) < 0) return 1;
+        switch (map_key) {
+            case suit_header_common:
+                if (GET_BSTR(map, common, len_common) < 0) return 1;
+                break;
+            case suit_header_manifest_version:
+                if (nanocbor_get_uint32(&map, &sp->version) < 0) return 1;
+                break;
+            case suit_header_manifest_sequence_number:
+                if (nanocbor_get_uint32(&map, &sp->sequence_number) < 0) return 1;
+                break;
+            case suit_header_payload_fetch:
+                nanocbor_skip(&map);
+                break;
+            case suit_header_install:
+                nanocbor_skip(&map);
+                break;
+            case suit_header_validate:
+                nanocbor_skip(&map);
+                break;
+            case suit_header_load:
+                nanocbor_skip(&map);
+                break;
+            case suit_header_run:
+                nanocbor_skip(&map);
+                break;
+        }
+        DUMPD(map_key);
+    }
+
+    DUMPD(sp->version);
+    DUMPD(sp->sequence_number);
+    return 0;
+}
