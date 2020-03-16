@@ -17,48 +17,69 @@
 
 #include <zoot/suit.h>
 
-int suit_parser_init(suit_parser_t * sp,
+int suit_parse_init(suit_context_t * ctx,
         const uint8_t * man, size_t len_man)
 {
     nanocbor_value_t nc, map;
     nanocbor_decoder_init(&nc, man, len_man);
 
-    if (nanocbor_enter_map(&nc, &map) < 0) return 1;
-    int32_t map_key;
-    uint8_t * common; size_t len_common;
+    uint8_t * sc; size_t len_sc;        /* suit_common */
+    uint8_t * tmp; size_t len_tmp;      /* other bstrs */
+    
+    /* initialize optional fields with NULL values */
+    nanocbor_decoder_init(&ctx->components, NULL, 0);
+    nanocbor_decoder_init(&ctx->payload_fetch, NULL, 0);
+    nanocbor_decoder_init(&ctx->install, NULL, 0);
+    nanocbor_decoder_init(&ctx->common_sequence, NULL, 0);
+    nanocbor_decoder_init(&ctx->validate, NULL, 0);
+    nanocbor_decoder_init(&ctx->load, NULL, 0);
+    nanocbor_decoder_init(&ctx->run, NULL, 0);
 
+    /* parse top-level map */
+    CBOR_ENTER_MAP(nc, map);
+    int32_t map_key; 
     while (!nanocbor_at_end(&map)) {
-        if (nanocbor_get_int32(&map, &map_key) < 0) return 1;
+        CBOR_GET_INT(map, map_key);
         switch (map_key) {
+
             case suit_header_common:
-                if (GET_BSTR(map, common, len_common) < 0) return 1;
+                CBOR_GET_BSTR(map, sc, len_sc);
                 break;
+
             case suit_header_manifest_version:
-                if (nanocbor_get_uint32(&map, &sp->version) < 0) return 1;
+                CBOR_GET_INT(map, ctx->version);
+                if (ctx->version != 1) return 1;
                 break;
+
             case suit_header_manifest_sequence_number:
-                if (nanocbor_get_uint32(&map, &sp->sequence_number) < 0) return 1;
+                CBOR_GET_INT(map, ctx->sequence_number);
                 break;
+
             case suit_header_payload_fetch:
-                nanocbor_skip(&map);
+                CBOR_GET_BSTR(map, tmp, len_tmp);
+                nanocbor_decoder_init(&ctx->payload_fetch, tmp, len_tmp);
                 break;
+
             case suit_header_install:
-                nanocbor_skip(&map);
+                CBOR_GET_BSTR(map, tmp, len_tmp);
+                nanocbor_decoder_init(&ctx->install, tmp, len_tmp);
                 break;
+
             case suit_header_validate:
-                nanocbor_skip(&map);
+                CBOR_GET_BSTR(map, tmp, len_tmp);
+                nanocbor_decoder_init(&ctx->validate, tmp, len_tmp);
                 break;
+
             case suit_header_load:
-                nanocbor_skip(&map);
+                CBOR_GET_BSTR(map, tmp, len_tmp);
+                nanocbor_decoder_init(&ctx->load, tmp, len_tmp);
                 break;
+
             case suit_header_run:
-                nanocbor_skip(&map);
+                CBOR_GET_BSTR(map, tmp, len_tmp);
+                nanocbor_decoder_init(&ctx->run, tmp, len_tmp);
                 break;
         }
-        DUMPD(map_key);
     }
-
-    DUMPD(sp->version);
-    DUMPD(sp->sequence_number);
     return 0;
 }

@@ -30,18 +30,18 @@ int suit_manifest_unwrap(const uint8_t * pem,
     size_t len_auth;
     nanocbor_value_t nc, map, arr;
     nanocbor_decoder_init(&nc, env, len_env);
-    if (nanocbor_enter_map(&nc, &map) < 0) return 1;
+    CBOR_ENTER_MAP(nc, map);
     int32_t map_key;
     while (!nanocbor_at_end(&map)) {
-        if (nanocbor_get_int32(&map, &map_key) < 0) return 1;
+        CBOR_GET_INT(map, map_key);
         if (map_key == suit_envelope_authentication_wrapper) {
-            if (GET_BSTR(map, auth, len_auth) < 0) return 1;
-            else break;
+            CBOR_GET_BSTR(map, auth, len_auth);
+            break;
         }
         nanocbor_skip(&map);
     }
     nanocbor_decoder_init(&nc, auth, len_auth);
-    if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
+    CBOR_ENTER_ARR(nc, arr);
 
     /* verify signature on authentication wrapper and get payload */ 
     uint8_t * pld;
@@ -53,20 +53,20 @@ int suit_manifest_unwrap(const uint8_t * pem,
     uint8_t * hash;
     size_t len_hash;
     nanocbor_decoder_init(&nc, pld, len_pld);
-    if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
+    CBOR_ENTER_ARR(nc, arr);
     nanocbor_skip(&arr);
-    GET_BSTR(arr, hash, len_hash);
+    CBOR_GET_BSTR(arr, hash, len_hash);
 
     /* extract manifest with CBOR byte string header */
     while (!nanocbor_at_end(&map)) {
-        if (nanocbor_get_int32(&map, &map_key) < 0) return 1;
+        CBOR_GET_INT(map, map_key);
         if (map_key == suit_envelope_manifest) break;
         nanocbor_skip(&map);
     }
 
     /* compute hash and write it to the end of the output buffer */
-    mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
-    const mbedtls_md_info_t * md_info = mbedtls_md_info_from_type(md_type);
+    const mbedtls_md_info_t * md_info =
+        mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     size_t md_size = mbedtls_md_get_size(md_info);
     uint8_t hash_out[md_size];
     mbedtls_md(md_info, map.cur, (map.end - map.cur), hash_out);
@@ -94,8 +94,8 @@ int suit_manifest_wrap(const uint8_t * pem,
     nanocbor_fmt_bstr(&nc, len_man);
 
     /* hash the manifest and write it to the end of the output buffer */
-    mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
-    const mbedtls_md_info_t * md_info = mbedtls_md_info_from_type(md_type);
+    const mbedtls_md_info_t * md_info =
+        mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     size_t md_size = mbedtls_md_get_size(md_info);
     mbedtls_md_context_t md_ctx;
     mbedtls_md_setup(&md_ctx, md_info, 0);
@@ -112,7 +112,8 @@ int suit_manifest_wrap(const uint8_t * pem,
 
     /* write the authentication wrapper */
     size_t len_auth = *len_env - 5;
-    cose_sign1_write(&ctx, env + *len_env - md_size - 4, md_size + 4, env + 5, &len_auth);
+    cose_sign1_write(&ctx, env + *len_env - md_size - 4, 
+            md_size + 4, env + 5, &len_auth);
 
     /* encode the envelope header */
     nanocbor_encoder_init(&nc, env, 5);
@@ -122,7 +123,8 @@ int suit_manifest_wrap(const uint8_t * pem,
     nanocbor_fmt_array(&nc, 1);
 
     /* skip to end of authentication wrapper and encode the manifest */
-    nanocbor_encoder_init(&nc, env + 5 + len_auth, *len_env - 5 - len_auth);
+    nanocbor_encoder_init(&nc, env + 5 + len_auth, 
+            *len_env - 5 - len_auth);
     nanocbor_fmt_uint(&nc, suit_envelope_manifest);
     nanocbor_fmt_bstr(&nc, len_man);
     *len_env = len_auth + 5 + nanocbor_encoded_len(&nc);

@@ -2,7 +2,7 @@
  * Copyright 2020 RISE Research Institutes of Sweden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in componentliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
  *   http://www.apache.org/licenses/LICENSE_2.0
@@ -20,8 +20,11 @@
 
 #include <cozy/cose.h>
 
-#define GET_BSTR(nc, out, len_out)                              \
-    nanocbor_get_bstr(&nc, (const uint8_t **) &out, &len_out) 
+#define CBOR_ENTER_ARR(nc, arr) if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
+#define CBOR_ENTER_MAP(nc, map) if (nanocbor_enter_map(&nc, &map) < 0) return 1;
+#define CBOR_GET_INT(nc, out) if (nanocbor_get_uint32(&nc, &out) < 0) return 1;
+#define CBOR_GET_BSTR(nc, out, len_out) \
+    if (nanocbor_get_bstr(&nc, (const uint8_t **) &out, &len_out) < 0) return 1;
 
 /** 
  * @brief SUIT API
@@ -188,45 +191,34 @@ typedef enum {
 } suit_text_t;
 
 typedef struct {
-    suit_md_alg_t md_alg;
-    uint8_t * hash;
-    size_t len_hash;
-} suit_digest_t;
-
-typedef struct {
-    bool is_hash;
-    union {
-        suit_digest_t hash;
-        nanocbor_value_t sequence;
-    };
-} suit_severable_sequence_t;
-
-typedef struct {
     uint32_t version;
     uint32_t sequence_number;
     nanocbor_value_t components;
+    nanocbor_value_t payload_fetch;
+    nanocbor_value_t install;
+    nanocbor_value_t common_sequence;
+    nanocbor_value_t validate;
+    nanocbor_value_t load;
+    nanocbor_value_t run;
+} suit_context_t;
 
-    /* severable command sequences */
-    suit_severable_sequence_t payload_fetch;
-    suit_severable_sequence_t install;
-    
-    /* ordinary command sequences */
-    suit_severable_sequence_t common_sequence;
-    suit_severable_sequence_t validate;
-    suit_severable_sequence_t load;
-    suit_severable_sequence_t run;
-} suit_parser_t;
-
-int suit_parser_init(suit_parser_t * sp,
+/**
+ * @brief Parses the top-level CBOR map in a SUIT manifest
+ *
+ * @param       ctx     Pointer to a SUIT context struct
+ * @param       man     Pointer to serialized SUIT manifest
+ * @param       len_man Size of manifest
+ */
+int suit_parse_init(suit_context_t * ctx,
         const uint8_t * man, size_t len_man);
 
 /**
  * @brief Authenticate a signed SUIT envelope and return the manifest
  * 
  * @param       pem     Pointer to PEM-formatted public key string
- * @param       env     Pointer to SUIT envelope
+ * @param       env     Pointer to serialized SUIT envelope
  * @param       len_env Size of envelope
- * @param[out]  man     Pointer to manifestifest within authenticated envelope
+ * @param[out]  man     Pointer to manifest within envelope
  * @param[out]  len_man Size of manifest
  *
  * @retval      0       TODO
@@ -240,9 +232,9 @@ int suit_manifest_unwrap(const uint8_t * pem,
  * @brief Generate a manifest envelope with authenticated wrapper
  *
  * @param       pem     Pointer to PEM-formatted private key string
- * @param       man     Pointer to SUIT manifest
+ * @param       man     Pointer to serialized SUIT manifest
  * @param       len_man Size of manifest
- * @param[out]  env     Pointer to SUIT envelope (buffer allocated by CALLER)
+ * @param[out]  env     Pointer to SUIT envelope (allocated by CALLER)
  * @param[out]  len_env Size of envelope
  *
  * @retval      0       TODO

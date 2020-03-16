@@ -23,8 +23,8 @@
     size_t len_man = strlen(SUIT_MANIFEST_##x) / 2;                     \
     uint8_t man[len_man];                                               \
     _xxd_r(SUIT_MANIFEST_##x, man);                                     \
-    suit_parser_t sp;                                                   \
-    zassert_false(suit_parser_init(&sp, man, len_man),                  \
+    suit_context_t ctx;                                                 \
+    zassert_false(suit_parse_init(&ctx, man, len_man),                  \
             "Failed to parse SUIT manifest.");
 
 /* converts hex-formatted IETF examples to raw bytes */
