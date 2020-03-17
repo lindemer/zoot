@@ -103,43 +103,43 @@ typedef enum {
 } suit_comp_t;
 
 typedef enum {
-    suit_condition_vendor_id = 1,
-    suit_condition_class_id = 2,
-    suit_condition_image_match = 3,
-    suit_condition_use_before = 4,
-    suit_condition_comp_offset = 5,
-    suit_condition_device_id = 24,
-    suit_condition_image_not_match = 25,
-    suit_condition_min_battery = 26,
-    suit_condition_update_authorized = 27,
-    suit_condition_version = 28,
-} suit_condition_t;
+    suit_cond_vendor_id = 1,
+    suit_cond_class_id = 2,
+    suit_cond_image_match = 3,
+    suit_cond_use_before = 4,
+    suit_cond_comp_offset = 5,
+    suit_cond_device_id = 24,
+    suit_cond_image_not_match = 25,
+    suit_cond_min_battery = 26,
+    suit_cond_update_authorized = 27,
+    suit_cond_version = 28,
+} suit_cond_t;
 
 typedef enum {
-    suit_condition_version_gt = 1,
-    suit_condition_version_ge = 2,
-    suit_condition_version_eq = 3,
-    suit_condition_version_le = 4,
-    suit_condition_version_lt = 5,
-} suit_condition_version_t;
+    suit_cond_version_gt = 1,
+    suit_cond_version_ge = 2,
+    suit_cond_version_eq = 3,
+    suit_cond_version_le = 4,
+    suit_cond_version_lt = 5,
+} suit_cond_version_t;
 
 typedef enum {
-    suit_directive_set_comp_idx = 12,
-    suit_directive_set_dep_idx = 13,
-    suit_directive_abort = 14,
-    suit_directive_try_each = 15,
-    suit_directive_do_each = 16, // TBD
-    suit_directive_map_filter = 17, // TBD
-    suit_directive_process_dep = 18,
-    suit_directive_set_params = 19,
-    suit_directive_override_params = 20,
-    suit_directive_fetch = 21,
-    suit_directive_copy = 22,
-    suit_directive_run = 23,
-    suit_directive_wait = 29,
-    suit_directive_run_seq = 30,
-    suit_directive_swap = 32,
-} suit_directive_t;
+    suit_dir_set_comp_idx = 12,
+    suit_dir_set_dep_idx = 13,
+    suit_dir_abort = 14,
+    suit_dir_try_each = 15,
+    suit_dir_do_each = 16, // TBD
+    suit_dir_map_filter = 17, // TBD
+    suit_dir_process_dep = 18,
+    suit_dir_set_params = 19,
+    suit_dir_override_params = 20,
+    suit_dir_fetch = 21,
+    suit_dir_copy = 22,
+    suit_dir_run = 23,
+    suit_dir_wait = 29,
+    suit_dir_run_seq = 30,
+    suit_dir_swap = 32,
+} suit_dir_t;
 
 typedef enum {
     suit_wait_authorization = 1,
@@ -186,22 +186,25 @@ typedef enum {
     suit_text_version_deps = 10,
 } suit_text_t;
 
-typedef struct {
-    bool run;
+typedef struct suit_component_s suit_component_t;
+
+struct suit_component_s {
+    bool run; 
+    size_t size;
     suit_md_alg_t md_alg;
     suit_archive_alg_t archive_alg;
-    int32_t size;
-    uint8_t * md; size_t len_md;
+    suit_component_t * source;
     uint8_t * uri; size_t len_uri;
-    uint8_t * vendor_id; size_t len_vendor_id;
+    uint8_t * digest; size_t len_digest;
     uint8_t * class_id; size_t len_class_id;
-} suit_component_t;
+    uint8_t * vendor_id; size_t len_vendor_id;
+};
 
 typedef struct {
-    int32_t version;
-    int32_t seq_num;
-    int32_t num_comps;
-    suit_component_t comps[SUIT_MAX_COMPONENTS];
+    size_t version;
+    size_t sequence_number;
+    size_t component_count;
+    suit_component_t components[SUIT_MAX_COMPONENTS];
 } suit_context_t;
 
 /**

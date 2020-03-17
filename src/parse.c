@@ -31,47 +31,47 @@
     if (nanocbor_get_bstr(&nc, (const uint8_t **) &val, &len_val) < 0) \
     return 1;
 
-int _suit_parse_sequence(suit_context_t * ctx,
+int _suit_parse_sequence(
+        suit_context_t * ctx, size_t idx,
         const uint8_t * seq, size_t len_seq)
 {
-    /* component selector */
-    size_t idx = 0;
-
     nanocbor_value_t top, arr, subarr;
     nanocbor_decoder_init(&top, seq, len_seq);
     uint8_t * tmp; size_t len_tmp; bool pass;
 
     CBOR_ENTER_ARR(top, arr);
-    int32_t arr_key; 
+    size_t arr_key; 
     while (!nanocbor_at_end(&arr)) {
         CBOR_GET_INT(arr, arr_key);
         switch (arr_key) {
 
-            /* DIRECTIVE set global parameters (TODO) */
-            case suit_directive_override_params:
+            /* DIRECTIVE override parameters (TODO) */
+            case suit_dir_override_params:
                 nanocbor_skip(&arr); break;
             
-            /* DIRECTIVE set local parameters (TODO) */
-            case suit_directive_set_params:
+            /* DIRECTIVE set parameters (TODO) */
+            case suit_dir_set_params:
                 nanocbor_skip(&arr); break;
 
             /* DIRECTIVE run this component */
-            case suit_directive_run:
-                ctx->comps[idx].run = true;
-                nanocbor_skip(&arr); break;
-
-            /* DIRECTIVE copy this component (TODO) */
-            case suit_directive_copy:
+            case suit_dir_run:
+                ctx->components[idx].run = true;
                 nanocbor_skip(&arr); break;
 
             /* DIRECTIVE set component index */
-            case suit_directive_set_comp_idx:
+            case suit_dir_set_comp_idx:
                 CBOR_GET_INT(arr, idx);
-                if (idx > ctx->num_comps) return 1;
+                if (idx > ctx->component_count - 1) return 1;
                 break;
 
+            /*
+             * This condition is underspecified in the latest draft.
+             * There is insufficient information to create a working
+             * implementation.
+             */
+
             /* CONDITION check component offset (TODO) */
-            case suit_condition_comp_offset:
+            case suit_cond_comp_offset:
                 nanocbor_skip(&arr); break;
 
             /* 
@@ -81,12 +81,12 @@ int _suit_parse_sequence(suit_context_t * ctx,
              */
 
             /* DIRECTIVE try each */
-            case suit_directive_try_each:
+            case suit_dir_try_each:
                 pass = false;
                 CBOR_ENTER_ARR(arr, subarr);
                 while (!nanocbor_at_end(&subarr)) {
                     CBOR_GET_BSTR(subarr, tmp, len_tmp);
-                    if (!_suit_parse_sequence(ctx, tmp, len_tmp)) {
+                    if (!_suit_parse_sequence(ctx, idx, tmp, len_tmp)) {
                         pass = true; break;
                     }
                 }
@@ -94,27 +94,35 @@ int _suit_parse_sequence(suit_context_t * ctx,
                 nanocbor_skip(&arr); break;
              
             /* 
-             * The conditions and directives are ignored because:
-             *  - vendor IDs are checked by default
-             *  - class IDs are checked by default
-             *  - digests are checked if they have been specified
-             *  - components are fetched if a uri has been specified
+             * These conditions and directives are not parsed 
+             * directly. They are implied by the existence of other 
+             * fields in the manifest.
+             *  - vendor IDs should be checked, if present
+             *  - class IDs should be checked, if present
+             *  - digests should be verified, if present
+             *  - components should be fetched if a URI is present
+             *  - components should be copied if a source component
+             *    is declared
              */ 
 
             /* CONDITION check vendor ID */
-            case suit_condition_vendor_id:
+            case suit_cond_vendor_id:
                 nanocbor_skip(&arr); break;
 
             /* CONDITION check class ID */ 
-            case suit_condition_class_id:
+            case suit_cond_class_id:
                 nanocbor_skip(&arr); break;
             
             /* CONDITION check component digest */
-            case suit_condition_image_match:
+            case suit_cond_image_match:
                 nanocbor_skip(&arr); break;
 
             /* DIRECTIVE fetch this component */
-            case suit_directive_fetch:
+            case suit_dir_fetch:
+                nanocbor_skip(&arr); break;
+
+            /* DIRECTIVE copy this component */
+            case suit_dir_copy:
                 nanocbor_skip(&arr); break;
 
             /* UNSUPPORTED */
@@ -135,13 +143,14 @@ int _suit_parse_common(suit_context_t * ctx,
     uint8_t * tmp; size_t len_tmp;
 
     CBOR_ENTER_MAP(top, map);
-    int32_t map_key; 
+    size_t map_key; 
     while (!nanocbor_at_end(&map)) {
         CBOR_GET_INT(map, map_key);
         switch (map_key) {
 
-            /* The number of components listed in the manifest must
-             * not exceed the device's specified limit (see I-D 
+            /* 
+             * The number of components listed in the manifest must
+             * not exceed the recipient's specified limit (see I-D 
              * Section 5.4). The components are referenced by index 
              * in the manifest. The component IDs can be discarded.
              */
@@ -149,14 +158,14 @@ int _suit_parse_common(suit_context_t * ctx,
                 CBOR_GET_BSTR(map, tmp, len_tmp);
                 nanocbor_decoder_init(&arr, tmp, len_tmp);
                 CBOR_ENTER_ARR(arr, elem);
-                ctx->num_comps = elem.remaining;
-                if (ctx->num_comps > SUIT_MAX_COMPONENTS) 
+                ctx->component_count = elem.remaining;
+                if (ctx->component_count > SUIT_MAX_COMPONENTS) 
                     return 1;
                 break;
 
             case suit_common_seq:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
@@ -175,18 +184,25 @@ int suit_parse_init(suit_context_t * ctx,
     nanocbor_decoder_init(&top, man, len_man);
     uint8_t * tmp; size_t len_tmp;
 
-    /* initialize command sequences */
-    for (size_t idx = 0; idx < SUIT_MAX_COMPONENTS; idx++) {
-        ctx->comps[idx].run = false;
-        ctx->comps[idx].md = NULL;
-        ctx->comps[idx].uri = NULL;
-        ctx->comps[idx].vendor_id = NULL;
-        ctx->comps[idx].class_id = NULL;
-    }
+    /* initialize components */
+    suit_component_t nil = {
+        .run            = false, 
+        .size           = 0,
+        .md_alg         = 0, 
+        .archive_alg    = 0,
+        .source         = NULL,
+        .uri            = NULL,
+        .digest         = NULL,
+        .class_id       = NULL,
+        .vendor_id      = NULL,
+    };
+
+    for (size_t idx = 0; idx < SUIT_MAX_COMPONENTS; idx++)
+        ctx->components[idx] = nil;
 
     /* parse top-level map */
     CBOR_ENTER_MAP(top, map);
-    int32_t map_key; 
+    size_t map_key; 
     while (!nanocbor_at_end(&map)) {
         CBOR_GET_INT(map, map_key);
         switch (map_key) {
@@ -203,36 +219,36 @@ int suit_parse_init(suit_context_t * ctx,
                 break;
 
             case suit_header_manifest_seq_num:
-                CBOR_GET_INT(map, ctx->seq_num);
+                CBOR_GET_INT(map, ctx->sequence_number);
                 break;
 
             case suit_header_payload_fetch:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
             case suit_header_install:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
             case suit_header_validate:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
             case suit_header_load:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
             case suit_header_run:
                 CBOR_GET_BSTR(map, tmp, len_tmp);
-                if (_suit_parse_sequence(ctx, tmp, len_tmp))
+                if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
 
