@@ -20,11 +20,7 @@
 
 #include <cozy/cose.h>
 
-#define CBOR_ENTER_ARR(nc, arr) if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
-#define CBOR_ENTER_MAP(nc, map) if (nanocbor_enter_map(&nc, &map) < 0) return 1;
-#define CBOR_GET_INT(nc, out) if (nanocbor_get_uint32(&nc, &out) < 0) return 1;
-#define CBOR_GET_BSTR(nc, out, len_out) \
-    if (nanocbor_get_bstr(&nc, (const uint8_t **) &out, &len_out) < 0) return 1;
+#define SUIT_MAX_COMPONENTS 2
 
 /** 
  * @brief SUIT API
@@ -43,17 +39,17 @@ typedef enum {
 } suit_md_alg_t;
 
 typedef enum {
-    suit_compress_info_alg = 1,
-    suit_compress_info_params = 2,
-} suit_compress_info_t;
+    suit_archive_info_alg = 1,
+    suit_archive_info_params = 2,
+} suit_archive_info_t;
 
 typedef enum {
-    suit_compress_alg_gzip = 1,
-    suit_compress_alg_bzip2 = 2,
-    suit_compress_alg_deflate = 3,
-    suit_compress_alg_lz4 = 4,
-    suit_compress_alg_lzma = 7,
-} suit_compress_alg_t;
+    suit_archive_alg_gzip = 1,
+    suit_archive_alg_bzip2 = 2,
+    suit_archive_alg_deflate = 3,
+    suit_archive_alg_lz4 = 4,
+    suit_archive_alg_lzma = 7,
+} suit_archive_alg_t;
 
 typedef enum {
     suit_unpack_info_alg = 1,
@@ -76,10 +72,10 @@ typedef enum {
 
 typedef enum {
     suit_header_manifest_version = 1,
-    suit_header_manifest_sequence_number = 2,
+    suit_header_manifest_seq_num = 2,
     suit_header_common = 3,
     suit_header_reference_uri = 4,
-    suit_header_dependency_resolution = 7,
+    suit_header_dep_resolution = 7,
     suit_header_payload_fetch = 8,
     suit_header_install = 9,
     suit_header_validate = 10,
@@ -90,28 +86,28 @@ typedef enum {
 } suit_header_t;
 
 typedef enum {
-    suit_common_dependencies = 1,
-    suit_common_components = 2,
-    suit_common_dependency_components = 3,
-    suit_common_sequence = 4,
+    suit_common_deps = 1,
+    suit_common_comps = 2,
+    suit_common_dep_comps = 3,
+    suit_common_seq = 4,
 } suit_common_t;
 
 typedef enum {
-    suit_dependency_digest = 1,
-    suit_dependency_preix = 2,
-} suit_dependency_t;
+    suit_dep_digest = 1,
+    suit_dep_prefix = 2,
+} suit_dep_t;
 
 typedef enum {
-    suit_component_id = 1,
-    suit_component_dependency_index = 2,
-} suit_component_t;
+    suit_comp_id = 1,
+    suit_comp_dep_idx = 2,
+} suit_comp_t;
 
 typedef enum {
     suit_condition_vendor_id = 1,
     suit_condition_class_id = 2,
     suit_condition_image_match = 3,
     suit_condition_use_before = 4,
-    suit_condition_component_offset = 5,
+    suit_condition_comp_offset = 5,
     suit_condition_device_id = 24,
     suit_condition_image_not_match = 25,
     suit_condition_min_battery = 26,
@@ -128,20 +124,20 @@ typedef enum {
 } suit_condition_version_t;
 
 typedef enum {
-    suit_directive_set_component_index = 12,
-    suit_directive_set_dependency_index = 13,
+    suit_directive_set_comp_idx = 12,
+    suit_directive_set_dep_idx = 13,
     suit_directive_abort = 14,
     suit_directive_try_each = 15,
     suit_directive_do_each = 16, // TBD
     suit_directive_map_filter = 17, // TBD
-    suit_directive_process_dependency = 18,
+    suit_directive_process_dep = 18,
     suit_directive_set_params = 19,
     suit_directive_override_params = 20,
     suit_directive_fetch = 21,
     suit_directive_copy = 22,
     suit_directive_run = 23,
     suit_directive_wait = 29,
-    suit_directive_run_sequence = 30,
+    suit_directive_run_seq = 30,
     suit_directive_swap = 32,
 } suit_directive_t;
 
@@ -160,15 +156,15 @@ typedef enum {
     suit_param_class_id = 2,
     suit_param_image_digest = 3,
     suit_param_use_before = 4,
-    suit_param_component_offset = 5,
+    suit_param_comp_offset = 5,
     suit_param_strict_order = 12,
     suit_param_soft_fail = 13,
     suit_param_image_size = 14,
     suit_param_encrypt_info = 18,
-    suit_param_compress_info = 19,
+    suit_param_archive_info = 19,
     suit_param_unpack_info = 20,
     suit_param_uri = 21,
-    suit_param_source_component = 22,
+    suit_param_source_comp = 22,
     suit_param_run_args = 23,
     suit_param_device_id = 24,
     suit_param_min_battery = 26,
@@ -184,22 +180,30 @@ typedef enum {
     suit_text_model_name = 4,
     suit_text_vendor_domain = 5,
     suit_text_model_info = 6,
-    suit_text_component_description = 7,
+    suit_text_comp_description = 7,
     suit_text_manifest_json_source = 8,
     suit_text_manifest_yaml_source = 9,
-    suit_text_version_dependencies = 10,
+    suit_text_version_deps = 10,
 } suit_text_t;
 
 typedef struct {
-    uint32_t version;
-    uint32_t sequence_number;
-    nanocbor_value_t components;
-    nanocbor_value_t payload_fetch;
-    nanocbor_value_t install;
-    nanocbor_value_t common_sequence;
-    nanocbor_value_t validate;
-    nanocbor_value_t load;
-    nanocbor_value_t run;
+    suit_md_alg_t md_alg;
+    suit_archive_alg_t archive_alg;
+    int32_t size;
+    uint8_t * md; size_t len_md;
+    uint8_t * uri; size_t len_uri;
+    uint8_t * vendor_id; size_t len_vendor_id;
+    uint8_t * class_id; size_t len_class_id;
+} suit_component_t;
+
+typedef struct {
+    int32_t version;
+    int32_t seq_num;
+    int32_t num_comps;
+    suit_component_t comps[SUIT_MAX_COMPONENTS];
+    bool run[SUIT_MAX_COMPONENTS];
+    bool fetch[SUIT_MAX_COMPONENTS];
+    bool match[SUIT_MAX_COMPONENTS];
 } suit_context_t;
 
 /**
@@ -221,8 +225,8 @@ int suit_parse_init(suit_context_t * ctx,
  * @param[out]  man     Pointer to manifest within envelope
  * @param[out]  len_man Size of manifest
  *
- * @retval      0       TODO
- * @retval      1       TODO
+ * @retval      0       pass
+ * @retval      1       fail 
  */
 int suit_manifest_unwrap(const uint8_t * pem, 
         const uint8_t * env, const size_t len_env,
@@ -237,8 +241,8 @@ int suit_manifest_unwrap(const uint8_t * pem,
  * @param[out]  env     Pointer to SUIT envelope (allocated by CALLER)
  * @param[out]  len_env Size of envelope
  *
- * @retval      0       TODO
- * @retval      1       TODO
+ * @retval      0       pass
+ * @retval      1       fail
  */
 int suit_manifest_wrap(const uint8_t * pem,
         const uint8_t * man, const size_t len_man,

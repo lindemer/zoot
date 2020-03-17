@@ -30,18 +30,19 @@ int suit_manifest_unwrap(const uint8_t * pem,
     size_t len_auth;
     nanocbor_value_t nc, map, arr;
     nanocbor_decoder_init(&nc, env, len_env);
-    CBOR_ENTER_MAP(nc, map);
+    if (nanocbor_enter_map(&nc, &map) < 0) return 1;
     int32_t map_key;
     while (!nanocbor_at_end(&map)) {
-        CBOR_GET_INT(map, map_key);
+        if (nanocbor_get_uint32(&map, &map_key) < 0) return 1;
         if (map_key == suit_envelope_authentication_wrapper) {
-            CBOR_GET_BSTR(map, auth, len_auth);
+            if (nanocbor_get_bstr(&map, (const uint8_t **) &auth, &len_auth) < 0) 
+                return 1;
             break;
         }
         nanocbor_skip(&map);
     }
     nanocbor_decoder_init(&nc, auth, len_auth);
-    CBOR_ENTER_ARR(nc, arr);
+    if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
 
     /* verify signature on authentication wrapper and get payload */ 
     uint8_t * pld;
@@ -53,13 +54,13 @@ int suit_manifest_unwrap(const uint8_t * pem,
     uint8_t * hash;
     size_t len_hash;
     nanocbor_decoder_init(&nc, pld, len_pld);
-    CBOR_ENTER_ARR(nc, arr);
+    if (nanocbor_enter_array(&nc, &arr) < 0) return 1;
     nanocbor_skip(&arr);
-    CBOR_GET_BSTR(arr, hash, len_hash);
+    if (nanocbor_get_bstr(&arr, (const uint8_t **) &hash, &len_hash) < 0) return 1;
 
     /* extract manifest with CBOR byte string header */
     while (!nanocbor_at_end(&map)) {
-        CBOR_GET_INT(map, map_key);
+        if (nanocbor_get_uint32(&map, &map_key) < 0) return 1;
         if (map_key == suit_envelope_manifest) break;
         nanocbor_skip(&map);
     }

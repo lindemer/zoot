@@ -43,19 +43,23 @@ const uint8_t * pem_pub = SUIT_TEST_KEY_256_PUB;
 const uint8_t * pem_prv = SUIT_TEST_KEY_256_PRV;
 
 void test_suit_boot(void) {
-    SUIT_PARSE(0)
+    SUIT_PARSE(0);
 
-    size_t len_env = 256; uint8_t env[256];
+    /* encode a signed manifest envelope */
+    size_t len_env = 256; uint8_t env[len_env];
     zassert_false(suit_manifest_wrap(
                 pem_prv, man, len_man, env, &len_env),
                 "Failed to write manifest envelope.");
 
+    /* verify encoded envelope and extract manifest */
     uint8_t * man_out;
     size_t len_man_out;
     zassert_false(suit_manifest_unwrap(
                 pem_pub, env, len_env,
                 (const uint8_t **) &man_out, &len_man_out),
                 "Failed to authenticate envelope contents.");
+
+    /* check that extracted manifest matches the original */
     zassert_true(len_man == len_man_out,
             "Failed to extract manifest.");
     zassert_false(memcmp(man, man_out, len_man),
@@ -63,25 +67,25 @@ void test_suit_boot(void) {
 }
  
 void test_suit_download_install(void) {
-    SUIT_PARSE(1)
+    SUIT_PARSE(1);
 }
 
 void test_suit_download_install_boot(void) {
-    SUIT_PARSE(2)
+    SUIT_PARSE(2);
 }
 
 void test_suit_load_external_storage(void) {
-    SUIT_PARSE(3)
+    SUIT_PARSE(3);
 }
 
 void test_suit_load_decompress_external_storage(void) {
-    SUIT_PARSE(4)
+    SUIT_PARSE(4);
 }
 
 void test_suit_compatibility_download_install_boot(void) {
-    SUIT_PARSE(5)
+    SUIT_PARSE(5);
 }
 
 void test_suit_two_images(void) {
-    SUIT_PARSE(6)
+    SUIT_PARSE(6);
 }
