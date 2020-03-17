@@ -187,6 +187,7 @@ typedef enum {
 } suit_text_t;
 
 typedef struct {
+    bool run;
     suit_md_alg_t md_alg;
     suit_archive_alg_t archive_alg;
     int32_t size;
@@ -201,9 +202,6 @@ typedef struct {
     int32_t seq_num;
     int32_t num_comps;
     suit_component_t comps[SUIT_MAX_COMPONENTS];
-    bool run[SUIT_MAX_COMPONENTS];
-    bool fetch[SUIT_MAX_COMPONENTS];
-    bool match[SUIT_MAX_COMPONENTS];
 } suit_context_t;
 
 /**

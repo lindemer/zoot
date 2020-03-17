@@ -37,8 +37,9 @@ int _suit_parse_sequence(suit_context_t * ctx,
     /* component selector */
     size_t idx = 0;
 
-    nanocbor_value_t top, arr;
+    nanocbor_value_t top, arr, subarr;
     nanocbor_decoder_init(&top, seq, len_seq);
+    uint8_t * tmp; size_t len_tmp; bool pass;
 
     CBOR_ENTER_ARR(top, arr);
     int32_t arr_key; 
@@ -48,30 +49,20 @@ int _suit_parse_sequence(suit_context_t * ctx,
 
             /* DIRECTIVE set global parameters (TODO) */
             case suit_directive_override_params:
-                nanocbor_skip(&arr);
-                break;
+                nanocbor_skip(&arr); break;
             
             /* DIRECTIVE set local parameters (TODO) */
             case suit_directive_set_params:
-                nanocbor_skip(&arr);
-                break;
+                nanocbor_skip(&arr); break;
 
             /* DIRECTIVE run this component */
             case suit_directive_run:
-                ctx->run[idx] = true;
-                nanocbor_skip(&arr);
-                break;
+                ctx->comps[idx].run = true;
+                nanocbor_skip(&arr); break;
 
-            /* DIRECTIVE fetch this component */
-            case suit_directive_fetch:
-                ctx->fetch[idx] = true;
-                nanocbor_skip(&arr);
-                break;
-            
             /* DIRECTIVE copy this component (TODO) */
             case suit_directive_copy:
-                nanocbor_skip(&arr);
-                break;
+                nanocbor_skip(&arr); break;
 
             /* DIRECTIVE set component index */
             case suit_directive_set_comp_idx:
@@ -79,27 +70,53 @@ int _suit_parse_sequence(suit_context_t * ctx,
                 if (idx > ctx->num_comps) return 1;
                 break;
 
-            /* DIRECTIVE try each (TODO) */
+            /* CONDITION check component offset (TODO) */
+            case suit_condition_comp_offset:
+                nanocbor_skip(&arr); break;
+
+            /* 
+             * This directive provides an ordered list of command
+             * sequences to attempt. The first to succeed is 
+             * accepted. If all fail, the manifest is rejected. 
+             */
+
+            /* DIRECTIVE try each */
             case suit_directive_try_each:
-                nanocbor_skip(&arr);
-                break;
+                pass = false;
+                CBOR_ENTER_ARR(arr, subarr);
+                while (!nanocbor_at_end(&subarr)) {
+                    CBOR_GET_BSTR(subarr, tmp, len_tmp);
+                    if (!_suit_parse_sequence(ctx, tmp, len_tmp)) {
+                        pass = true; break;
+                    }
+                }
+                if (!pass) return 1;
+                nanocbor_skip(&arr); break;
+             
+            /* 
+             * The conditions and directives are ignored because:
+             *  - vendor IDs are checked by default
+             *  - class IDs are checked by default
+             *  - digests are checked if they have been specified
+             *  - components are fetched if a uri has been specified
+             */ 
 
-            /* CONDITION check component digest */
-            case suit_condition_image_match:
-                ctx->match[idx] = true;
-                nanocbor_skip(&arr);
-                break;
-
-            /* CONDITION check vendor ID */ 
+            /* CONDITION check vendor ID */
             case suit_condition_vendor_id:
-                nanocbor_skip(&arr);
-                break;
-            
+                nanocbor_skip(&arr); break;
+
             /* CONDITION check class ID */ 
             case suit_condition_class_id:
-                nanocbor_skip(&arr);
-                break;
+                nanocbor_skip(&arr); break;
             
+            /* CONDITION check component digest */
+            case suit_condition_image_match:
+                nanocbor_skip(&arr); break;
+
+            /* DIRECTIVE fetch this component */
+            case suit_directive_fetch:
+                nanocbor_skip(&arr); break;
+
             /* UNSUPPORTED */
             default: 
                 DUMPD(arr_key);
@@ -123,8 +140,7 @@ int _suit_parse_common(suit_context_t * ctx,
         CBOR_GET_INT(map, map_key);
         switch (map_key) {
 
-            /* 
-             * The number of components listed in the manifest must
+            /* The number of components listed in the manifest must
              * not exceed the device's specified limit (see I-D 
              * Section 5.4). The components are referenced by index 
              * in the manifest. The component IDs can be discarded.
@@ -161,9 +177,11 @@ int suit_parse_init(suit_context_t * ctx,
 
     /* initialize command sequences */
     for (size_t idx = 0; idx < SUIT_MAX_COMPONENTS; idx++) {
-        ctx->fetch[idx] = false;
-        ctx->match[idx] = false;
-        ctx->run[idx] = false;
+        ctx->comps[idx].run = false;
+        ctx->comps[idx].md = NULL;
+        ctx->comps[idx].uri = NULL;
+        ctx->comps[idx].vendor_id = NULL;
+        ctx->comps[idx].class_id = NULL;
     }
 
     /* parse top-level map */
