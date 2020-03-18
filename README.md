@@ -15,7 +15,7 @@ struct suit_component_s {
      * These values are initialized to 0. If not 0, they should be
      * processed accordingly by the update handler.
      */
-    suit_md_alg_t md_alg;               /* digest algorithm */
+    suit_digest_alg_t digest_alg;       /* digest algorithm */
     suit_archive_alg_t archive_alg;     /* compression algorithm */
 
     /* 

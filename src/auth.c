@@ -108,7 +108,7 @@ int suit_manifest_wrap(const uint8_t * pem,
     /* serialize the authentication wrapper payload in place */
     nanocbor_encoder_init(&nc, env + *len_env - md_size - 4, 4);
     nanocbor_fmt_array(&nc, 2);
-    nanocbor_fmt_uint(&nc, suit_md_alg_sha256);
+    nanocbor_fmt_uint(&nc, suit_digest_alg_sha256);
     nanocbor_fmt_bstr(&nc, md_size);
 
     /* write the authentication wrapper */

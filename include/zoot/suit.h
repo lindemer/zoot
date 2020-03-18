@@ -28,15 +28,15 @@
  */
 
 typedef enum {
-    suit_md_alg_sha224 = 1,
-    suit_md_alg_sha256 = 2,
-    suit_md_alg_sha384 = 3,
-    suit_md_alg_sha512 = 4,
-    suit_md_alg_sha3_224 = 5,
-    suit_md_alg_sha3_256 = 6,
-    suit_md_alg_sha3_384 = 7,
-    suit_md_alg_sha3_512 = 8,
-} suit_md_alg_t;
+    suit_digest_alg_sha224 = 1,
+    suit_digest_alg_sha256 = 2,
+    suit_digest_alg_sha384 = 3,
+    suit_digest_alg_sha512 = 4,
+    suit_digest_alg_sha3_224 = 5,
+    suit_digest_alg_sha3_256 = 6,
+    suit_digest_alg_sha3_384 = 7,
+    suit_digest_alg_sha3_512 = 8,
+} suit_digest_alg_t;
 
 typedef enum {
     suit_archive_info_alg = 1,
@@ -196,7 +196,7 @@ struct suit_component_s {
      * These values are initialized to 0. If not 0, they should be
      * processed accordingly by the update handler.
      */
-    suit_md_alg_t md_alg;               /* digest algorithm */
+    suit_digest_alg_t digest_alg;       /* digest algorithm */
     suit_archive_alg_t archive_alg;     /* compression algorithm */
 
     /* 

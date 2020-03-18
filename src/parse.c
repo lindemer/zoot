@@ -287,7 +287,7 @@ int suit_parse_init(suit_context_t * ctx,
     suit_component_t nil = {
         .run            = false, 
         .size           = 0,
-        .md_alg         = 0, 
+        .digest_alg     = 0, 
         .archive_alg    = 0,
         .source         = NULL,
         .uri            = NULL,
