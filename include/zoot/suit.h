@@ -187,32 +187,54 @@ typedef enum {
 } suit_text_t;
 
 typedef struct suit_component_s suit_component_t;
-
 struct suit_component_s {
-    bool run; 
-    size_t size;
-    suit_md_alg_t md_alg;
-    suit_archive_alg_t archive_alg;
-    suit_component_t * source;
+    
+    bool run;    /* component is referenced by a run directive */
+    size_t size; /* image size (bytes) */
+
+    /*
+     * These values are initialized to 0. If not 0, they should be
+     * processed accordingly by the update handler.
+     */
+    suit_md_alg_t md_alg;               /* digest algorithm */
+    suit_archive_alg_t archive_alg;     /* compression algorithm */
+
+    /* 
+     * These pointers are initialized to NULL. If not NULL, they
+     * should be processed accordingly by the update handler. NB
+     * these reference locations in the encoded manifest itself.
+     */
     uint8_t * uri; size_t len_uri;
     uint8_t * digest; size_t len_digest;
     uint8_t * class_id; size_t len_class_id;
     uint8_t * vendor_id; size_t len_vendor_id;
+    suit_component_t * source;
+
 };
 
 typedef struct {
-    size_t version;
-    size_t sequence_number;
-    size_t component_count;
+
+    size_t version;         /* always 1 */
+    size_t sequence_number; /* rollback protection */
+    size_t component_count; /* may be less than maximum allowed */
+
+    /* 
+     * Recipients should specify a limit to the number of manifest
+     * components (see I-D Section 5.4).
+     */
     suit_component_t components[SUIT_MAX_COMPONENTS];
+
 } suit_context_t;
 
 /**
  * @brief Parses the top-level CBOR map in a SUIT manifest
  *
  * @param       ctx     Pointer to a SUIT context struct
- * @param       man     Pointer to serialized SUIT manifest
+ * @param       man     Pointer to encoded SUIT manifest
  * @param       len_man Size of manifest
+ *
+ * @retval      0       pass
+ * @retval      1       fail 
  */
 int suit_parse_init(suit_context_t * ctx,
         const uint8_t * man, size_t len_man);
@@ -221,7 +243,7 @@ int suit_parse_init(suit_context_t * ctx,
  * @brief Authenticate a signed SUIT envelope and return the manifest
  * 
  * @param       pem     Pointer to PEM-formatted public key string
- * @param       env     Pointer to serialized SUIT envelope
+ * @param       env     Pointer to encoded SUIT envelope
  * @param       len_env Size of envelope
  * @param[out]  man     Pointer to manifest within envelope
  * @param[out]  len_man Size of manifest

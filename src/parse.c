@@ -17,7 +17,14 @@
 
 #include <zoot/suit.h>
 
-/* any parsing failure results in total manifest rejection */
+/*
+ * All strings in the SUIT manifest are copied by reference to 
+ * their memory locations in the manifest itself. The caller must 
+ * not deallocate the memory containing the original manifest until
+ * processing is complete. This parser does not support soft-
+ * failure; any error will result in total manifest rejection.
+ */
+
 #define CBOR_ENTER_ARR(nc1, nc2) \
     if (nanocbor_enter_array(&nc1, &nc2) < 0) return 1;
 
@@ -31,11 +38,98 @@
     if (nanocbor_get_bstr(&nc, (const uint8_t **) &val, &len_val) < 0) \
     return 1;
 
+#define CBOR_GET_TSTR(nc, val, len_val) \
+    if (nanocbor_get_tstr(&nc, (const uint8_t **) &val, &len_val) < 0) \
+    return 1;
+
+int _suit_parse_parameters(
+        suit_context_t * ctx, size_t idx,
+        nanocbor_value_t * map, bool override)
+{
+    nanocbor_value_t arr;
+    size_t map_key; size_t map_val;
+    while (!nanocbor_at_end(map)) {
+        CBOR_GET_INT(*map, map_key);
+        switch (map_key) {
+
+            /*
+             * The vendor ID, class ID and URI fields are encoded 
+             * as CBOR byte strings and are copied by reference.
+             */
+            case suit_param_vendor_id:
+                if (override || ctx->components[idx].vendor_id == NULL) 
+                    CBOR_GET_BSTR(*map, 
+                            ctx->components[idx].vendor_id,
+                            ctx->components[idx].len_vendor_id);
+                break;
+
+            case suit_param_class_id:
+                if (override || ctx->components[idx].class_id == NULL)
+                    CBOR_GET_BSTR(*map, 
+                            ctx->components[idx].class_id,
+                            ctx->components[idx].len_class_id);
+                break;
+
+            case suit_param_uri:
+                if (override || ctx->components[idx].uri == NULL)
+                    CBOR_GET_TSTR(*map, 
+                            ctx->components[idx].uri,
+                            ctx->components[idx].len_uri);
+                break;
+
+            /*
+             * Image digests are stored in a sub-array containing 
+             * an algorithm identifier (int) and the digest (bstr).
+             */
+            case suit_param_image_digest:
+                CBOR_ENTER_ARR(*map, arr);
+                if (override || ctx->components[idx].digest == NULL) {
+                    CBOR_GET_INT(arr, ctx->components[idx].len_digest);
+                    CBOR_GET_BSTR(arr,
+                            ctx->components[idx].digest,
+                            ctx->components[idx].len_digest);
+                }
+                nanocbor_skip(map); break;
+
+            /*
+             * The image size and archive (i.e., compression) 
+             * information are encoded as CBOR integers and are 
+             * copied by value.
+             */
+            case suit_param_image_size:
+                if (override || ctx->components[idx].size == 0)
+                    CBOR_GET_INT(*map, ctx->components[idx].size);
+                break;
+
+            case suit_param_archive_info:
+                if (override || ctx->components[idx].archive_alg == 0)
+                    CBOR_GET_INT(*map, ctx->components[idx].archive_alg);
+                break;
+
+            /*
+             * A source is a reference from one manifest component 
+             * to another. This is stored as a pointer in the
+             * suit_component struct.
+             */
+            case suit_param_source_comp:
+                CBOR_GET_INT(*map, map_val);
+                if (override || ctx->components[idx].source == NULL)
+                    ctx->components[idx].source = &ctx->components[map_val];
+                break;
+
+            /* FAIL if unsupported */
+            default: return 1;
+
+        }
+    }
+    return 0;
+}
+
 int _suit_parse_sequence(
         suit_context_t * ctx, size_t idx,
         const uint8_t * seq, size_t len_seq)
 {
-    nanocbor_value_t top, arr, subarr;
+    nanocbor_value_t top, arr, subarr, map;
     nanocbor_decoder_init(&top, seq, len_seq);
     uint8_t * tmp; size_t len_tmp; bool pass;
 
@@ -45,12 +139,18 @@ int _suit_parse_sequence(
         CBOR_GET_INT(arr, arr_key);
         switch (arr_key) {
 
-            /* DIRECTIVE override parameters (TODO) */
+            /* DIRECTIVE override parameters */
             case suit_dir_override_params:
+                CBOR_ENTER_MAP(arr, map);
+                if (_suit_parse_parameters(ctx, idx, &map, true))
+                    return 1;
                 nanocbor_skip(&arr); break;
             
-            /* DIRECTIVE set parameters (TODO) */
+            /* DIRECTIVE set parameters */
             case suit_dir_set_params:
+                CBOR_ENTER_MAP(arr, map);
+                if (_suit_parse_parameters(ctx, idx, &map, false))
+                    return 1;
                 nanocbor_skip(&arr); break;
 
             /* DIRECTIVE run this component */
@@ -65,12 +165,12 @@ int _suit_parse_sequence(
                 break;
 
             /*
-             * This condition is underspecified in the latest draft.
-             * There is insufficient information to create a working
-             * implementation.
+             * This condition is underspecified in the latest 
+             * draft. There is insufficient information to create a 
+             * working implementation.
              */
 
-            /* CONDITION check component offset (TODO) */
+            /* CONDITION check component offset */
             case suit_cond_comp_offset:
                 nanocbor_skip(&arr); break;
 
@@ -125,10 +225,8 @@ int _suit_parse_sequence(
             case suit_dir_copy:
                 nanocbor_skip(&arr); break;
 
-            /* UNSUPPORTED */
-            default: 
-                DUMPD(arr_key);
-                return 1;
+            /* FAIL if unsupported */
+            default: return 1;
 
         }
     }
@@ -169,6 +267,7 @@ int _suit_parse_common(suit_context_t * ctx,
                     return 1;
                 break;
 
+            /* CONTINUE if unsupported */
             default:
                 nanocbor_skip(&map);
                 break;
@@ -251,6 +350,9 @@ int suit_parse_init(suit_context_t * ctx,
                 if (_suit_parse_sequence(ctx, 0, tmp, len_tmp))
                     return 1;
                 break;
+
+            /* FAIL if unsupported */
+            default: return 1;
 
         }
     }
