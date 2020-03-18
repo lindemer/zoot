@@ -69,5 +69,5 @@ Add the following line to your app's `prj.conf`:
 
 Access the **Zoot** API from your source files with `#include <zoot/suit.h>`.
 
-## Current coverage [the latest Internet-Draft](https://tools.ietf.org/html/draft-ietf-suit-manifest-04)
+## Current coverage of [the latest Internet-Draft](https://tools.ietf.org/html/draft-ietf-suit-manifest-04)
 **Zoot** can parse all of the manifests provided in the example section of the latest I-D. These are included as unit tests in  `tests/src/tests.c`. (Run `west build -t run -b native_posix` from the `tests` directory.) Most of the SUIT features which are not required to parse the examples have not been implemented.
