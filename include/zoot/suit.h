@@ -229,7 +229,7 @@ typedef struct {
 /**
  * @brief Parses the top-level CBOR map in a SUIT manifest
  *
- * @param       ctx     Pointer to a SUIT context struct
+ * @param       ctx     Pointer to SUIT parser context struct
  * @param       man     Pointer to encoded SUIT manifest
  * @param       len_man Size of manifest
  *
@@ -270,6 +270,42 @@ int suit_manifest_unwrap(const uint8_t * pem,
 int suit_manifest_wrap(const uint8_t * pem,
         const uint8_t * man, const size_t len_man,
         uint8_t * env, size_t * len_env);
+
+
+/* API for global SUIT manifest parameters */
+
+size_t suit_get_version(suit_context_t * ctx); 
+size_t suit_get_sequence_number(suit_context_t * ctx);
+size_t suit_get_component_count(suit_context_t * ctx);
+
+/* API for components within a SUIT manifest */
+
+bool suit_must_run(suit_context_t * ctx, size_t idx);
+
+size_t suit_get_size(suit_context_t * ctx, size_t idx);
+bool suit_has_size(suit_context_t * ctx, size_t idx);
+
+suit_digest_alg_t suit_get_digest_alg(suit_context_t * ctx, size_t idx);
+suit_archive_alg_t suit_get_archive_alg(suit_context_t * ctx, size_t idx);
+
+bool suit_has_digest(suit_context_t * ctx, size_t idx);
+bool suit_digest_is_match(suit_context_t * ctx, size_t idx,
+        const uint8_t * digest, size_t len_digest);
+
+bool suit_has_uri(suit_context_t * ctx, size_t idx);
+void suit_get_uri(suit_context_t * ctx, size_t idx,
+        const uint8_t ** uri, size_t * len_uri);
+
+bool suit_has_class_id(suit_context_t * ctx, size_t idx);
+bool suit_class_id_is_match(suit_context_t * ctx, size_t idx,
+        const uint8_t * class_id, size_t len_class_id);
+
+bool suit_has_vendor_id(suit_context_t * ctx, size_t idx);
+bool suit_vendor_id_is_match(suit_context_t * ctx, size_t idx,
+        const uint8_t * vendor_id, size_t len_vendor_id);
+
+bool suit_has_source_component(suit_context_t * ctx, size_t idx);
+suit_component_t * suit_get_source_component(suit_context_t * ctx, size_t idx);
 
 /**
  * @}

@@ -49,26 +49,6 @@ static uint8_t test_uri[] = {
     zassert_false(suit_parse_init(&ctx, man, len_man),                  \
             "Failed to parse SUIT manifest.");
 
-#define SUIT_TEST_STRING(idx, VAR)                                      \
-    zassert_true(                                                       \
-            sizeof(test_##VAR) == ctx.components[idx].len_##VAR,        \
-            "Failed to parse %s.", #VAR);                               \
-    zassert_false(memcmp(ctx.components[idx].VAR, test_##VAR,           \
-                sizeof(test_##VAR)), "Failed to parse %s.", #VAR);
-
-#define SUIT_TEST_CLASS(idx)    SUIT_TEST_STRING(idx, class_id)
-#define SUIT_TEST_VENDOR(idx)   SUIT_TEST_STRING(idx, vendor_id)
-#define SUIT_TEST_DIGEST(idx)   SUIT_TEST_STRING(idx, digest)
-#define SUIT_TEST_URI(idx)      SUIT_TEST_STRING(idx, uri)
-
-#define SUIT_TEST_SIZE(idx)                                             \
-    zassert_true(ctx.components[idx].size == test_size,                 \
-            "Failed to parse image size.");
-
-#define SUIT_TEST_SOURCE(idx0, idx1)                                    \
-    zassert_true(ctx.components[idx0].source == &ctx.components[idx1],  \
-            "Failed to parse source component.");
-
 /* converts hex-formatted IETF examples to raw bytes */
 void _xxd_r(char * hex, uint8_t * out)
 {
@@ -110,76 +90,130 @@ void test_suit_boot(void) {
  
 void test_suit_download_install(void) {
     SUIT_TEST_PARSE(1);
-    SUIT_TEST_CLASS(0);
-    SUIT_TEST_VENDOR(0);
-    SUIT_TEST_DIGEST(0);
-    SUIT_TEST_URI(0);
-    SUIT_TEST_SIZE(0);
-    zassert_false(ctx.components[0].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 0, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 0, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 0, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri, uri, len_uri), "Unexpected URI.");
+
+    zassert_true(suit_get_size(&ctx, 0) == test_size, "Unexpeted image size.");
+    zassert_false(suit_must_run(&ctx, 0), "Unexpected run directive.");
 }
 
 void test_suit_download_install_boot(void) {
     SUIT_TEST_PARSE(2);
-    SUIT_TEST_CLASS(0);
-    SUIT_TEST_VENDOR(0);
-    SUIT_TEST_DIGEST(0);
-    SUIT_TEST_URI(0);
-    SUIT_TEST_SIZE(0);
-    zassert_true(ctx.components[0].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 0, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 0, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 0, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri, uri, len_uri), "Unexpected URI.");
+
+    zassert_true(suit_get_size(&ctx, 0) == test_size, "Unexpeted image size.");
+    zassert_true(suit_must_run(&ctx, 0), "Unexpected run directive.");
 }
 
 void test_suit_load_external_storage(void) {
     SUIT_TEST_PARSE(3);
-    SUIT_TEST_CLASS(0);
-    SUIT_TEST_VENDOR(0);
-    SUIT_TEST_DIGEST(0);
-    SUIT_TEST_URI(0);
-    SUIT_TEST_SIZE(0);
-    SUIT_TEST_SOURCE(1, 0);
-    zassert_false(ctx.components[0].run,
-            "Run directive mismatch.");
-    zassert_true(ctx.components[1].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 0, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 0, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 0, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+    zassert_true(
+            suit_get_source_component(&ctx, 1) == &ctx.components[0],
+            "Unexpected source component.");
+
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri, uri, len_uri), "Unexpected URI.");
+
+    zassert_true(suit_get_size(&ctx, 0) == test_size, "Unexpeted image size.");
+    zassert_false(suit_must_run(&ctx, 0), "Unexpected run directive.");
+    zassert_true(suit_must_run(&ctx, 1), "Unexpected run directive.");
 }
 
 void test_suit_load_decompress_external_storage(void) {
     SUIT_TEST_PARSE(4);
-    SUIT_TEST_CLASS(0);
-    SUIT_TEST_VENDOR(0);
-    SUIT_TEST_DIGEST(0);
-    SUIT_TEST_URI(0);
-    SUIT_TEST_SIZE(0);
-    SUIT_TEST_SOURCE(1, 0);
-    zassert_false(ctx.components[0].run,
-            "Run directive mismatch.");
-    zassert_true(ctx.components[1].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 0, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 0, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 0, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+    zassert_true(
+            suit_get_source_component(&ctx, 1) == &ctx.components[0],
+            "Unexpected source component.");
+
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri, uri, len_uri), "Unexpected URI.");
+
+    zassert_true(suit_get_size(&ctx, 0) == test_size, "Unexpeted image size.");
+    zassert_false(suit_must_run(&ctx, 0), "Unexpected run directive.");
+    zassert_true(suit_must_run(&ctx, 1), "Unexpected run directive.");
 }
 
 void test_suit_compatibility_download_install_boot(void) {
     SUIT_TEST_PARSE(5);
-    SUIT_TEST_CLASS(1);
-    SUIT_TEST_VENDOR(1);
-    SUIT_TEST_DIGEST(1);
-    SUIT_TEST_URI(0);
-    SUIT_TEST_SIZE(1);
-    SUIT_TEST_SOURCE(1, 0);
-    zassert_false(ctx.components[0].run,
-            "Run directive mismatch.");
-    zassert_true(ctx.components[1].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 1, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 1, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 1, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+    zassert_true(
+            suit_get_source_component(&ctx, 1) == &ctx.components[0],
+            "Unexpected source component.");
+
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri, uri, len_uri), "Unexpected URI.");
+
+    zassert_true(suit_get_size(&ctx, 1) == test_size, "Unexpeted image size.");
+    zassert_false(suit_must_run(&ctx, 0), "Unexpected run directive.");
+    zassert_true(suit_must_run(&ctx, 1), "Unexpected run directive.");
 }
 
 void test_suit_two_images(void) {
     SUIT_TEST_PARSE(6);
-    SUIT_TEST_CLASS(0);
-    SUIT_TEST_VENDOR(0);
-    SUIT_TEST_DIGEST(0);
-    SUIT_TEST_SIZE(0);
-    zassert_false(ctx.components[0].run,
-            "Run directive mismatch.");
+    zassert_true(
+            suit_class_id_is_match(&ctx, 0, test_class_id, sizeof(test_class_id)),
+            "Class ID mismatch.");
+    zassert_true(
+            suit_vendor_id_is_match(&ctx, 0, test_vendor_id, sizeof(test_vendor_id)),
+            "Vendor ID mismatch.");
+    zassert_true(
+            suit_digest_is_match(&ctx, 0, test_digest, sizeof(test_digest)),
+            "Image digest mismatch.");
+
+    zassert_true(suit_get_size(&ctx, 0) == test_size, "Unexpeted image size.");
+    zassert_false(suit_must_run(&ctx, 0), "Unexpected run directive.");
 
     uint8_t test_uri_[] = {
         'h', 't', 't', 'p', ':', '/', '/', 'e', 
@@ -187,8 +221,8 @@ void test_suit_two_images(void) {
         'o', 'm', '/', 'f', 'i', 'l', 'e', '1',
         '.', 'b', 'i', 'n'
     };
-    zassert_true(sizeof(test_uri_) == ctx.components[0].len_uri,
-            "Failed to parse uri.");
-    zassert_false(memcmp(ctx.components[0].uri, test_uri_,
-                sizeof(test_uri)), "Failed to parse uri.");
+    
+    uint8_t * uri; size_t len_uri;
+    suit_get_uri(&ctx, 0, (const uint8_t **) &uri, &len_uri);
+    zassert_false(memcmp(test_uri_, uri, len_uri), "Unexpected URI.");
 }
