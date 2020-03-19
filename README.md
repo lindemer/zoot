@@ -4,7 +4,8 @@
 ## Usage
 **Zoot** parses CBOR-encoded SUIT manifests into manageable C structs further update handling. This is done without allocating additional buffers or using heap memory. Examples can be found in the tests directory. Parsing a SUIT manifest is done via a single function call to `suit_parse_init`, and the contents of an initialized context struct are accessed via API calls.
 ```c
-int suit_parse_init(suit_context_t * ctx, const uint8_t * man, size_t len_man);
+int suit_parse_init(suit_context_t * ctx, 
+        const uint8_t * man, size_t len_man);
 ```
 
 **Zoot** also handles signature validation and manifest integrity checks on SUIT envelopes. This requires a PEM-formatted public key, and currently only supports COSE Sign1 authentication wrappers. The following simultaneously validates a SUIT envelope and extracts the manifest within:
