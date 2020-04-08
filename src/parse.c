@@ -84,7 +84,9 @@ int _suit_parse_parameters(
             case suit_param_image_digest:
                 CBOR_ENTER_ARR(*map, arr);
                 if (override || ctx->components[idx].digest == NULL) {
-                    CBOR_GET_INT(arr, ctx->components[idx].digest_alg);
+                    if (nanocbor_get_uint32(&arr, 
+                                (uint32_t *) &ctx->components[idx].digest_alg) < 0) 
+                        return 1;
                     CBOR_GET_BSTR(arr,
                             ctx->components[idx].digest,
                             ctx->components[idx].len_digest);
@@ -103,7 +105,9 @@ int _suit_parse_parameters(
 
             case suit_param_archive_info:
                 if (override || ctx->components[idx].archive_alg == 0)
-                    CBOR_GET_INT(*map, ctx->components[idx].archive_alg);
+                    if (nanocbor_get_uint32(map, 
+                                (uint32_t *) &ctx->components[idx].archive_alg) < 0) 
+                        return 1;
                 break;
 
             /*
